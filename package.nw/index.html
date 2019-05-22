@@ -1,0 +1,257 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Cornell Notes</title>
+    <!-- css样式加载 -->
+    <link rel="stylesheet" href="css/whitey.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+    </style>
+    <!-- 头部js脚本加载 -->
+    <script src="config.js"></script>
+    <script src="js/init.js"></script>
+    <script src="theme/night mode.js" id="theme"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <!-- 网页顶部 -->
+    <div id="header">
+        <input type="text" name="" id="file-name" placeholder="Cornell Notes">
+        <button class="header-button" id="add-win" onclick="window.location.href = '\index.html'">+</button>
+        <button class="header-button" id="pack-edit" onclick="adjustEdit()">收起编辑区</button>
+        <button class="header-button" id="pack-show" onclick="adjustShow()">收起显示区</button>
+        <button class="header-button" id="help" onclick="window.open('src/help.html')">帮助</button>
+        <button class="header-button" id="text" for="file">导入</button>
+        <!-- 顶部下滑区 -->
+    </div>
+    <div id="header-slide">
+        <div class="container">
+            <div id="dashboard" class="dashboard">拖拽上传</div>
+        </div>
+    </div>
+    <div id="header-slide-2">
+        <div class="container">
+            <div id="dashboard" class="dashboard">欢迎使用Cornell Notes暂不支持自动更新，请手动到<a
+                    href="http://down.onemue.cn/archives/107">检查更新</a>!</div>
+        </div>
+    </div>
+    <!-- 网页内容 -->
+    <div id="content">
+        <!-- 左侧编辑区 -->
+        <div id="left-edit">
+            <div id="reduce-left">
+                <textarea class="input-text reduce-text" wrap="logical" id="reduce-edit"
+                    onkeyup="analysis()"></textarea>
+            </div>
+            <div id="record-left">
+                <textarea class="input-text record-text" wrap="logical" id="record-edit"
+                    onkeyup="analysis()"></textarea>
+            </div>
+            <div id="review-left">
+                <textarea class="input-text review-text" wrap="logical" id="review-edit"
+                    onkeyup="analysis()"></textarea>
+            </div>
+        </div>
+        <!-- 右侧显示区 -->
+        <div id="right-show">
+            <div id="reduce-right">
+                <samp class="no-select">Recite&Reduce:</samp>
+                <div id="reduce-show"></div>
+            </div>
+            <div id="record-right">
+                <samp class="no-select">Record:</samp>
+                <div id="record-show"></div>
+            </div>
+            <div id="review-right">
+                <samp class="no-select">Reflect&Review:</samp>
+                <div id="review-show"></div>
+            </div>
+        </div>
+    </div>
+    <!-- 底部js脚本加载 -->
+
+    <script src="js/marked.min.js"></script>
+    <script src="js/FileSaver.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/HyperDown.js-master/Parser.js"></script>
+    <script>
+        var parser = new HyperDown;
+    </script>
+    <script src="js/mackdown.1.js"></script>
+    <script>
+        var parser = new HyperDown;
+    </script>
+    <script>
+        document.onkeydown = function (e) {
+            /**
+             * 监听按键
+             */
+            event = event || window.event;
+            var currKey = 0, e = e || event || window.event;
+            currKey = e.keyCode || e.which || e.charCode;
+            //检测按下哪个键，作相应处理
+            if ((e.ctrlKey || e.metaKey)) {
+                switch (currKey) {
+
+                    case 83:
+
+                        console.log("ctrl+s");
+                        fileSave();
+
+                        break;
+
+                    case 82:
+                        console.log("ctrl+w");
+
+                        adjustEdit();
+
+                        break;
+
+                    case 87:
+                        console.log("ctrl+r");
+
+                        adjustShow();
+
+                        break;
+
+                }
+            }
+        }
+    </script>
+    <script>
+        //动画效果
+        $(document).ready(function () {
+            $("#text").click(function () {
+                // 动画效果
+                $("#header-slide").slideToggle("slow");
+            });
+            $("#header-slide-2").slideToggle("slow");
+            setTimeout(function () {
+                $("#header-slide-2").slideToggle("slow");
+            }, 2000);
+
+        });
+    </script>
+    <script type="text/javascript">
+        //拖拽上传
+        var dashboard = document.getElementById("dashboard")
+        dashboard.addEventListener("dragover", function (e) {
+            e.preventDefault()
+            e.stopPropagation()
+        })
+        dashboard.addEventListener("dragenter", function (e) {
+            e.preventDefault()
+            e.stopPropagation()
+        })
+        dashboard.addEventListener("drop", function (e) {
+            // 必须要禁用浏览器默认事件
+            e.preventDefault();
+            e.stopPropagation();
+            var files = this.files || e.dataTransfer.files;
+            var reader = new FileReader();
+            reader.readAsText(files[0], 'utf-8');
+            reader.onload = function (evt) {
+                var text = evt.target.result;
+                var fileType = '';
+                var fileBool = '';
+                var reduce_text = '';
+                var record_text = '';
+                var review_text = '';
+                var _fileName = '';
+                fileName = document.getElementById('file-name');
+                reduce_input = document.getElementById('reduce-edit');
+                record_input = document.getElementById('record-edit');
+                review_input = document.getElementById('review-edit');
+                text.trim().split('\n').forEach(function (v, i) {
+
+                    if (v == "> Application: Cornell Notes") {
+                        fileBool = true;
+                    };
+                    if (fileBool == true) {
+                        // console.log(v);
+
+                        switch (v) {
+                            case "> File Name":
+                                // console.log("File Name开始载入");
+                                fileType = v;
+                                break;
+                            case "# Recite&Reduce":
+
+                                // console.log("Recite&Reduce开始载入");
+                                fileType = v;
+                                break;
+
+                            case "# Record":
+                                // console.log("Record开始载入");
+                                fileType = v;
+                                break;
+
+                            case "# Reflect&Review":
+                                // console.log("Reflect开始载入");
+                                fileType = v;
+                                break;
+                        }
+                        // console.log(fileType);
+                        if (v != fileType) {
+                            console.log(fileType);
+                            switch (fileType) {
+                                case "> File Name":
+                                    console.log("> File Name");
+                                    console.log(v.slice(2));
+                                    if (_fileName == "") {
+                                        _fileName = v.slice(2);
+                                    } else {
+                                        console.log(v.slice(2));
+                                        _fileName = v.slice(2);
+                                        console.log("文件名");
+                                    }
+
+                                    break;
+                                case "# Recite&Reduce":
+                                    if (reduce_text == "") {
+                                        reduce_text = reduce_text + v;
+                                    } else {
+                                        reduce_text = reduce_text + "\n" + v;
+                                    }
+
+                                    break;
+                                case "# Record":
+                                    // console.log(v);
+                                    if (record_text == "") {
+                                        record_text = record_text + v;
+                                    } else {
+                                        record_text = record_text + "\n" + v;
+                                        // console.log(record_text);
+                                    }
+
+                                    break;
+                                case "# Reflect&Review":
+                                    // console.log(v);
+                                    if (review_text == "") {
+                                        review_text = review_text + v;
+                                    } else {
+                                        review_text = review_text + "\n" + v;
+                                    }
+
+                                    break;
+                            }
+                        }
+
+
+                    }
+                });
+                console.log(_fileName);
+                fileName.value = _fileName;
+                reduce_input.innerHTML = reduce_text;
+                record_input.innerHTML = record_text;
+                review_input.innerHTML = review_text;
+                $("#header-slide").slideToggle("slow");
+                analysis();
+            }
+        })
+    </script>
+</body>
+
+</html>

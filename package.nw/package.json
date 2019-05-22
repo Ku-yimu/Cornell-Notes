@@ -1,0 +1,16 @@
+{
+  "name": "Cornell Notes",
+  "version": "1.0 beta",
+  "main": "package.nw/index.html",
+  "window": {
+    "title": "Cornell Notes",
+    "icon": "app/static/img/weixin_logo.jpg",
+    "toolbar": true,
+    "frame": true,
+    "width": 1160,
+    "height": 920,
+    "position": "center",
+    "min_width": 1060,
+    "min_height": 920
+  }
+}

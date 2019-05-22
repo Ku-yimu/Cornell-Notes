@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>drag file</title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		.container {
+			width: 60%;
+			max-width: 600px;
+			height: 320px;
+			padding: 15px;
+			margin: 20px auto 0;
+			border-radius: 10px;
+		}
+		.dashboard {
+			width: 100%;
+			height: 100%;
+			box-sizing: border-box;
+			padding: 12px;
+			border: 3px dashed #000000;
+			border-radius: 5px;
+			font-size: 20px;
+			color: #2c1612;
+			cursor: text;
+			white-space: pre-wrap; 
+			/*word-break: break-all;*/
+			word-wrap: break-word;
+			overflow-y: auto;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div id="dashboard" class="dashboard">拖拽上传</div>
+	</div>
+	<script type="text/javascript">
+		var dashboard = document.getElementById("dashboard")
+		dashboard.addEventListener("dragover", function (e) {
+			e.preventDefault()
+			e.stopPropagation()
+		})
+		dashboard.addEventListener("dragenter", function (e) {
+			e.preventDefault()
+			e.stopPropagation()
+		})
+		dashboard.addEventListener("drop", function (e) {
+			// 必须要禁用浏览器默认事件
+			e.preventDefault()
+			e.stopPropagation()
+			var files = this.files || e.dataTransfer.files
+			var reader = new FileReader()
+			reader.readAsText(files[0], 'utf-8')
+			reader.onload = function (evt) {
+				var text = evt.target.result
+				dashboard.innerText = text
+			}
+		})
+	</script>
+</body>
+</html>
